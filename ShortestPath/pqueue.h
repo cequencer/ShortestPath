@@ -7,27 +7,27 @@ class PriorityQueue
 	std::list<T> list;
 
 public:
-	bool empty();
-	T top();
-	void push(T value);
+	bool empty() const;
+	T top() const;
+	void push(const T& value);
 	void pop();
-	void remove(T value);
-	size_t size();
+	void remove(const T& value);
+	size_t size() const;
 };
 
 template <typename T>
-bool PriorityQueue<T>::empty()
+bool PriorityQueue<T>::empty() const
 {
 	return list.empty();
 }
 template <typename T>
-T PriorityQueue<T>::top()
+T PriorityQueue<T>::top() const
 {
 	return list.front();
 }
 
 template <typename T>
-void PriorityQueue<T>::push(T value)
+void PriorityQueue<T>::push(const T& value)
 {
 	for(typename std::list<T>::const_iterator iterator = list.begin(); iterator != list.end(); ++iterator)
 		if(value < *iterator)
@@ -45,13 +45,13 @@ void PriorityQueue<T>::pop()
 }
 
 template <typename T>
-void PriorityQueue<T>::remove(T value)
+void PriorityQueue<T>::remove(const T& value)
 {
 	list.remove(value);
 }
 
 template <typename T>
-size_t PriorityQueue<T>::size()
+size_t PriorityQueue<T>::size() const
 {
 	return list.size();
 }

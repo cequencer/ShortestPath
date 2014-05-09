@@ -10,26 +10,27 @@ public:
 	/*static int A_star_search_algorythm(const Graph<std::pair<int, int>,int>& graph, const std::set<int>& first_vertice_group,
 	                             const std::set<int>& second_vertice_group, std::vector<int> shortest_path);*/
 	static int A_star_search_algorythm(
-		const Graph<std::pair<int, int>,int>& graph, const int start, const int goal, std::vector<int> shortest_path);
+		const Graph<std::pair<int, int>,int>& graph, const int start, const int goal, std::list<int>& shortest_path);
 };
 
 struct GraphAlgorithms::VertexStatus
 {	
 	int vertex;
 	int status_code;
+	int parent;
 	int g;
 	int h;
 	int f;
-	explicit VertexStatus(const int vertex) : vertex(vertex), status_code(0), g(0), h(0), f(0)  {}
-	bool operator<(const VertexStatus& right) {	return f < right.f;	}
-	bool operator==(const VertexStatus& right) { return vertex < right.vertex; }
+	explicit VertexStatus(const int vertex) : vertex(vertex), status_code(0), parent(-1), g(0), h(0), f(0)  {}
+	bool operator<(const VertexStatus& right) const {	return f < right.f;	}
+	bool operator==(const VertexStatus& right) const { return vertex < right.vertex; }
 
 private:
-	VertexStatus() : vertex(0), status_code(0), g(0), h(0), f(0)  {}
+	VertexStatus() : vertex(0), status_code(0), parent(-1), g(0), h(0), f(0)  {}
 };
 
 inline int GraphAlgorithms::A_star_search_algorythm(
-	const Graph<std::pair<int, int>,int>& graph, const int start, const int goal, std::vector<int> shortest_path)
+	const Graph<std::pair<int, int>,int>& graph, const int start, const int goal, std::list<int>& shortest_path)
 {
 	std::vector<VertexStatus> vertices_status(graph.get_num_vertices(), VertexStatus(0));
 
@@ -42,13 +43,17 @@ inline int GraphAlgorithms::A_star_search_algorythm(
 	PriorityQueue<VertexStatus> open_vertices_queue;
 	open_vertices_queue.push(vertices_status[start]);
 
+	int path_cost = -1;
 	while (!open_vertices_queue.empty())
 	{
 		VertexStatus open_vertex = open_vertices_queue.top();
 		open_vertices_queue.pop();
 
 		if(open_vertex.vertex == goal)
-			return open_vertex.g;
+		{		
+			path_cost = open_vertex.g;
+			break;
+		}			
 		vertices_status[open_vertex.vertex].status_code = 2;
 
 		std::vector<Edge<int>> neighbors;
@@ -76,10 +81,21 @@ inline int GraphAlgorithms::A_star_search_algorythm(
 				open_vertices_queue.remove(vertices_status[neighbor]);
 			}
 
+			vertices_status[neighbor].parent = open_vertex.vertex;
 			vertices_status[neighbor].g = g;
 			vertices_status[neighbor].h = 0;
 			vertices_status[neighbor].f = vertices_status[neighbor].g + vertices_status[neighbor].h;
 			open_vertices_queue.push(vertices_status[neighbor]);
 		}
 	}
+
+	shortest_path.clear();
+	int current_vertex = goal;
+	while (current_vertex != -1)
+	{
+		shortest_path.push_front(current_vertex);
+		current_vertex = vertices_status[current_vertex].parent;
+	}
+
+	return path_cost;
 }

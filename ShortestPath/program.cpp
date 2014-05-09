@@ -25,9 +25,13 @@ int main()
 
 	g.print(cout);
 
-	vector<int> sp;
-	int p = GraphAlgorithms::A_star_search_algorythm(g, 10, 13, sp);
+	list<int> sp;
+	int p = GraphAlgorithms::A_star_search_algorythm(g, 1, 14, sp);
 	cout << p << endl;
+
+	for(list<int>::const_iterator i=sp.begin(); i != sp.end(); ++i)
+		cout << *i << " ";
+	cout << endl;
 
 	return 0;	
 }

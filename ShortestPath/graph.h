@@ -183,8 +183,8 @@ inline void Graph<typename TVertexValue, typename TEdgeWeight>::print(std::ostre
 	{
 		out_stream << i << " <--> ";
 		for(size_t j=0; j < adjacency_list[i].neighbors.size(); ++j)
-			out_stream << adjacency_list[i].neighbors[j].destination
-				<< "(" << adjacency_list[i].neighbors[j].weight << ") ";
+			out_stream << adjacency_list[i].neighbors[j].destination << " ";
+				/*<< "(" << adjacency_list[i].neighbors[j].weight << ") ";*/
 		out_stream << std::endl;
 	}
 }
