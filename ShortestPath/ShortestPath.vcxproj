@@ -78,7 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graph.h" />
-    <ClInclude Include="graphalg.h" />
+    <ClInclude Include="astar.h" />
     <ClInclude Include="pqueue.h" />
   </ItemGroup>
   <ItemGroup>

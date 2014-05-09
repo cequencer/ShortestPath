@@ -22,7 +22,7 @@ class Graph
 	std::vector<Vertex<TVertexValue, TEdgeWeight>> adjacency_list;
 	int num_vertices;
 	Graph();
-	bool is_edge_valid(const int vertex_origin, const int vertex_destination) const;
+	bool is_edge_valid(const int vertex_origin, const int vertex_destination) const;	
 
 public:
 	explicit Graph(int num_vertices);
@@ -33,7 +33,7 @@ public:
 	bool contains_edge(const int vertex_origin, const int vertex_destination) const;
 	bool get_edge_weight(const int vertex_origin, const int vertex_destination, TEdgeWeight& weight) const;
 	bool set_edge_weight(const int vertex_origin, const int vertex_destination, const TEdgeWeight& weight);
-	bool get_vertex_value(const int vertex, TVertexValue& value);
+	bool get_vertex_value(const int vertex, TVertexValue& value) const;
 	bool set_vertex_value(const int vertex, const TVertexValue& value);
 	void print(std::ostream& out_stream) const;
 };
@@ -158,7 +158,7 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::set_edge_weight(
 
 template<typename TVertexValue, typename TEdgeWeight>
 bool Graph<typename TVertexValue, typename TEdgeWeight>::get_vertex_value(
-	const int vertex, TVertexValue& value)
+	const int vertex, TVertexValue& value) const
 {
 	if(vertex >= num_vertices || vertex < 0)
 		return false;

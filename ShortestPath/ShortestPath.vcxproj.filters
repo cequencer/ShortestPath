@@ -23,10 +23,10 @@
     <ClInclude Include="graph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="graphalg.h">
+    <ClInclude Include="pqueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pqueue.h">
+    <ClInclude Include="astar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
