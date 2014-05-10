@@ -22,7 +22,7 @@ class Graph
 	std::vector<Vertex<TVertexValue, TEdgeWeight>> adjacency_list;
 	int num_vertices;
 	Graph();
-	bool is_edge_valid(const int vertex_origin, const int vertex_destination) const;	
+	bool is_edge_valid(const int vertex_origin, const int vertex_destination) const;
 
 public:
 	explicit Graph(int num_vertices);
@@ -184,7 +184,6 @@ inline void Graph<typename TVertexValue, typename TEdgeWeight>::print(std::ostre
 		out_stream << i << " <--> ";
 		for(size_t j=0; j < adjacency_list[i].neighbors.size(); ++j)
 			out_stream << adjacency_list[i].neighbors[j].destination << " ";
-				/*<< "(" << adjacency_list[i].neighbors[j].weight << ") ";*/
 		out_stream << std::endl;
 	}
 }

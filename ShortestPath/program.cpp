@@ -51,8 +51,7 @@ Graph<pair<double,double>,double> graph_from_stream(istream& in_stream, const do
 		in_stream >> x;
 		in_stream >> y;
 		g.set_vertex_value(vertex, pair<double,double>(x,y));
-	}
-	
+	}	
 
 	AStarEuclidianHeuristic heuristic;
 	int vertex_origin, vertex_destination;
@@ -69,10 +68,18 @@ int main()
 	Graph<pair<double,double>, double> g = graph_from_stream(file_stream, p);
 
 	g.print(cout);
+	
+	set<int> start_group;
+	set<int> goal_group;
+
+	start_group.insert(0);
+	start_group.insert(6);
+	goal_group.insert(4);
+	goal_group.insert(9);
 
 	list<int> sp;
 	AStarSearch<pair<double,double>, double>::find_shortest_path(
-		g, 0, 4, AStarEuclidianHeuristic(), sp, p);
+		g, start_group, goal_group, AStarEuclidianHeuristic(), sp, p);
 	cout << p << endl;
 
 	for(list<int>::const_iterator i=sp.begin(); i != sp.end(); ++i)

@@ -32,5 +32,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="graph.txt" />
+    <None Include="graph2.txt" />
   </ItemGroup>
 </Project>
