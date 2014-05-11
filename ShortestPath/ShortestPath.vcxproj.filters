@@ -29,6 +29,9 @@
     <ClInclude Include="astar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="graphio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="graph.txt" />

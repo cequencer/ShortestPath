@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="graph.h" />
     <ClInclude Include="astar.h" />
+    <ClInclude Include="graphio.h" />
     <ClInclude Include="pqueue.h" />
   </ItemGroup>
   <ItemGroup>

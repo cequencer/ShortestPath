@@ -1,6 +1,12 @@
+#pragma once
+#ifndef GRAPH_H
+#define GRAPH_H
+
 #include <ostream>
 #include <vector>
 
+// Класс, представляющий ребро графа.
+// Экземпляр класса хранит только вес и конечную вершину.
 template<typename TEdgeWeight>
 struct Edge
 {
@@ -9,6 +15,7 @@ struct Edge
 	Edge(int destination, TEdgeWeight weight): destination(destination), weight(weight)	{ }
 };
 
+// Класс, позволяющий сохранять дополнительную информацию о вершине (координаты и т.п.).
 template<typename TVertexValue, typename TEdgeWeight>
 struct Vertex
 {
@@ -16,6 +23,9 @@ struct Vertex
 	std::vector<Edge<TEdgeWeight>> neighbors;
 };
 
+// Граф реализован в виде списка смежности.
+// Большинство методов возращают булево значение - статус выполнения метода: успешно/неуспешно.
+// Выходные данные (если таковые в методе имеются) в этом случае возвращаются через параметры метода.
 template<typename TVertexValue, typename TEdgeWeight>
 class Graph
 {
@@ -57,6 +67,8 @@ Graph<typename TVertexValue, typename TEdgeWeight>::Graph(int num_vertices) : nu
 	adjacency_list.resize(num_vertices);
 }
 
+// Граф неориентированный, поэтому метод добавляет сразу две записи
+// в список смежности: ВЕРШИНА1 ВЕРШИНА2 ВЕС и ВЕРШИНА2 ВЕРШИНА1 ВЕС.
 template<typename TVertexValue, typename TEdgeWeight>
 bool Graph<typename TVertexValue, typename TEdgeWeight>::add_edge(
 	const int vertex_origin, const int vertex_destination, const TEdgeWeight& weight)
@@ -187,3 +199,4 @@ inline void Graph<typename TVertexValue, typename TEdgeWeight>::print(std::ostre
 		out_stream << std::endl;
 	}
 }
+#endif

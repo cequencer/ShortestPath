@@ -1,3 +1,7 @@
+#pragma once
+#ifndef PQUEUE_H
+#define PQUEUE_H
+
 #include <vector>
 #include <stdexcept>
 
@@ -138,3 +142,4 @@ size_t PriorityQueue<T>::size() const
 {
 	return storage.size();
 }
+#endif

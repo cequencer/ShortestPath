@@ -1,90 +1,68 @@
 #include <fstream>
-#include "astar.h"
 #include <iostream>
-#include <math.h>
+#include "graphio.h"
 
 using namespace std;
 
-Graph<int,int> graph_from_stream(istream& in_stream, const int fake)
+void example_graph()
 {
-	int num_vertices;
-	if(!(in_stream >> num_vertices))
-		return Graph<int,int>(0);
-	Graph<int,int> g = Graph<int,int>(num_vertices);
+	ifstream file_stream("graph.txt");
+	Graph<int, int> graph =
+		GraphIO::from_stream_int(file_stream);
 
-	int vertex_origin, vertex_destination, weight;
-	while(in_stream >> vertex_origin && in_stream >> vertex_destination && in_stream >> weight)
-		g.add_edge(vertex_origin, vertex_destination, weight);
-
-	return g;
-}
-
-class AStarEuclidianHeuristic : public AStarSearch<pair<double,double>, double>::AStarDefaultHeuristic
-{
-	typedef pair<double,double> point;
-public:
-	virtual ~AStarEuclidianHeuristic() {}
-	virtual double get_cost(const Graph<point, double> graph, int start, int goal) const
-	{
-		point start_point, goal_point;
-		graph.get_vertex_value(start, start_point);
-		graph.get_vertex_value(goal, goal_point);
-
-		double x = start_point.first - goal_point.first;
-		double y = start_point.second - goal_point.second;
-		return sqrt(x*x + y*y);
-	}
-};
-
-Graph<pair<double,double>,double> graph_from_stream(istream& in_stream, const double fake)
-{
-	int num_vertices;
-	if(!(in_stream >> num_vertices))
-		return Graph<pair<double,double>,double>(0);
-	Graph<pair<double,double>,double> g = Graph<pair<double,double>,double>(num_vertices);
-
-	int vertex; 
-	double x, y;
-	for(int i=1; i <= num_vertices; ++i)
-	{
-		in_stream >> vertex;
-		in_stream >> x;
-		in_stream >> y;
-		g.set_vertex_value(vertex, pair<double,double>(x,y));
-	}	
-
-	AStarEuclidianHeuristic heuristic;
-	int vertex_origin, vertex_destination;
-	while(in_stream >> vertex_origin && in_stream >> vertex_destination)
-		g.add_edge(vertex_origin, vertex_destination, heuristic.get_cost(g, vertex_origin, vertex_destination));
-
-	return g;
-}
-
-int main()
-{
-	ifstream file_stream("graph2.txt");
-	double p = 0;
-	Graph<pair<double,double>, double> g = graph_from_stream(file_stream, p);
-
-	g.print(cout);
+	graph.print(cout);
 	
 	set<int> start_group;
 	set<int> goal_group;
 
-	start_group.insert(0);
-	start_group.insert(6);
-	goal_group.insert(4);
-	goal_group.insert(9);
+	start_group.insert(14);
+	//start_group.insert(0);
+	goal_group.insert(8);
+	goal_group.insert(0);
 
-	list<int> sp;
-	AStarSearch<pair<double,double>, double>::find_shortest_path(
-		g, start_group, goal_group, AStarEuclidianHeuristic(), sp, p);
-	cout << p << endl;
+	int shortest_path_cost;
+	list<int> shortest_path;
+	AStarSearch<int, int>::find_shortest_path(
+		graph, start_group, goal_group, AStarSearch<int,int>::AStarDefaultHeuristic(),
+		shortest_path, shortest_path_cost);
+	cout << shortest_path_cost << endl;
 
-	for(list<int>::const_iterator i=sp.begin(); i != sp.end(); ++i)
+	for(list<int>::const_iterator i=shortest_path.begin(); i != shortest_path.end(); ++i)
 		cout << *i << " ";
-	cout << endl;
+	cout << endl << endl;
+}
+
+void example_graph2()
+{
+	ifstream file_stream("graph2.txt");
+	Graph<pair<double,double>, double> graph =
+		GraphIO::from_stream_double_double(file_stream);
+
+	graph.print(cout);
+	
+	set<int> start_group;
+	set<int> goal_group;
+
+	//start_group.insert(11);
+	start_group.insert(8);
+	goal_group.insert(4);
+	goal_group.insert(12);
+
+	double shortest_path_cost;
+	list<int> shortest_path;
+	AStarSearch<pair<double,double>, double>::find_shortest_path(
+		graph, start_group, goal_group, AStarEuclidianHeuristic(), shortest_path, shortest_path_cost);
+	cout << shortest_path_cost << endl;
+
+	for(list<int>::const_iterator i=shortest_path.begin(); i != shortest_path.end(); ++i)
+		cout << *i << " ";
+	cout << endl << endl;
+}
+
+int main()
+{
+	example_graph();
+	example_graph2();
 
 	return 0;	
 }

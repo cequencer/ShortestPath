@@ -1,9 +1,13 @@
+#pragma once
+#ifndef ASTAR_H
+#define ASTAR_H
+
 #include <set>
 #include <list>
 #include "graph.h"
 #include "pqueue.h"
 
-// Алгоритм поиска A*
+// Алгоритм поиска кратчайшего пути A*
 template<typename TVertexValue, typename TEdgeWeight>
 class AStarSearch
 {	
@@ -13,7 +17,7 @@ public:
 		const Graph<TVertexValue, TEdgeWeight>& graph, const std::set<int> start_group, const std::set<int> goal_group,
 		const AStarDefaultHeuristic& heuristic, std::list<int>& shortest_path, TEdgeWeight& shortest_path_cost);
 private :
-	enum StatusCode { UNDISCOVERED, OPEN, CLOSED, GOAL };
+	enum StatusCode { UNDISCOVERED, OPEN, CLOSED, UNDISCOVERED_GOAL, OPEN_GOAL };
 	struct VertexStatus;
 	static TEdgeWeight min_heuristic_cost(const Graph<TVertexValue, TEdgeWeight>& graph,
 		const int start, const std::set<int> goal_group, const AStarDefaultHeuristic& heuristic);
@@ -34,6 +38,12 @@ struct AStarSearch<typename TVertexValue, TEdgeWeight>::VertexStatus
 	bool operator==(const VertexStatus& right) const { return vertex == right.vertex; }
 };
 
+// Алгоритм A* использует для поиска кратчайшего пути эвристическую оценку расстояния от текущей вершины до целевой. 
+// Эвристическая оценка не должна переоценивать расстояние до конечной вершины.
+// Класс по умолчанию AStarDefaultHeuristic всегда возвращает нулевую эвристическую оценку.
+// Для того, чтобы ввести свою оценку, необходимо создать производный от AStarDefaultHeuristic класс и переопределить метод get_cost().
+// Трудоемкость алгоритма A* существенно зависит от используемой эвристичекой оценки.
+// Если использовать нулевую оценку по умолчанию, то получим в сущности алгоритм Дейкстры (останавливающийся при достижении целевой вершины).
 template<typename TVertexValue, typename TEdgeWeight>
 struct AStarSearch<typename TVertexValue, TEdgeWeight>::AStarDefaultHeuristic
 {
@@ -41,6 +51,11 @@ struct AStarSearch<typename TVertexValue, TEdgeWeight>::AStarDefaultHeuristic
 	virtual TEdgeWeight get_cost(const Graph<TVertexValue, TEdgeWeight> graph, int start, int goal) const { return TEdgeWeight(); }
 };
 
+// Алгоритм A* в исходном виде ищет кратчайший путь между двумя вершинами.
+// В данной реализации алгоритм модифицирован: добавлена возможность поиска кратчайшего пути между двумя группами вершин.
+// Идея модифицированного алгоритма состоит в том, что в граф добаляется некоторая <<виртуальная>> вершина,
+// которая соединена ребрами со всеми вершинами из группы стартовых вершин.
+// Далее осуществляется поиск кратчайшего пути с помощью A* от добавленной до ближайшей целевой вершины.
 template<typename TVertexValue, typename TEdgeWeight>
 bool AStarSearch<typename TVertexValue,TEdgeWeight>::find_shortest_path(
 	const Graph<TVertexValue, TEdgeWeight>& graph, const std::set<int> start_group, const std::set<int> goal_group,
@@ -56,7 +71,7 @@ bool AStarSearch<typename TVertexValue,TEdgeWeight>::find_shortest_path(
 		if(vertex > graph.get_num_vertices() || vertex < 0)
 			return false;
 		vertices_status[vertex].vertex = vertex;
-		vertices_status[vertex].status_code = GOAL;
+		vertices_status[vertex].status_code = UNDISCOVERED_GOAL;
 	}
 
 	PriorityQueue<VertexStatus> open_vertices_queue;
@@ -80,7 +95,7 @@ bool AStarSearch<typename TVertexValue,TEdgeWeight>::find_shortest_path(
 		VertexStatus open_vertex = open_vertices_queue.top();
 		open_vertices_queue.pop();
 
-		if(vertices_status[open_vertex.vertex].status_code == GOAL)
+		if(vertices_status[open_vertex.vertex].status_code == OPEN_GOAL)
 		{			
 			shortest_path_cost = open_vertex.cost_from_start_to_this;
 			shortest_path.clear();
@@ -94,28 +109,37 @@ bool AStarSearch<typename TVertexValue,TEdgeWeight>::find_shortest_path(
 		}
 
 		vertices_status[open_vertex.vertex].status_code = CLOSED;
+
 		std::vector<Edge<TEdgeWeight>> neighbors;
 		graph.get_neighbors(open_vertex.vertex, neighbors);
 		for(size_t i=0; i < neighbors.size(); ++i)
 		{
 			int neighbor = neighbors[i].destination;
 			if(vertices_status[neighbor].status_code == CLOSED)
+			{
 				continue;
+			}
 
 			TEdgeWeight edge_weight_to_neighbor;
 			graph.get_edge_weight(open_vertex.vertex, neighbor, edge_weight_to_neighbor);
 			TEdgeWeight cost_from_start_to_neighbor = open_vertex.cost_from_start_to_this + edge_weight_to_neighbor;
 
-			if(vertices_status[neighbor].status_code == OPEN &&
+			if((vertices_status[neighbor].status_code == OPEN || vertices_status[neighbor].status_code == OPEN_GOAL) &&
 				cost_from_start_to_neighbor >= vertices_status[neighbor].cost_from_start_to_this)
+			{
 				continue;
+			}
 
 			if(vertices_status[neighbor].status_code == UNDISCOVERED)
 			{
 				vertices_status[neighbor].vertex = neighbor;
 				vertices_status[neighbor].status_code = OPEN;				
 			}
-			else if(vertices_status[neighbor].status_code == OPEN)
+			else if(vertices_status[neighbor].status_code == UNDISCOVERED_GOAL)
+			{
+				vertices_status[neighbor].status_code = OPEN_GOAL;				
+			}
+			else /*if(vertices_status[neighbor].status_code == OPEN || vertices_status[neighbor].status_code == OPEN_GOAL)*/
 			{
 				open_vertices_queue.remove(vertices_status[neighbor]);
 			}
@@ -147,3 +171,4 @@ TEdgeWeight AStarSearch<typename TVertexValue,TEdgeWeight>::min_heuristic_cost(c
 	}
 	return min_weight;
 }
+#endif
