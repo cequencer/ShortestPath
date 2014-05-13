@@ -21,17 +21,17 @@ struct Vertex
 {
 	TVertexValue value;
 	std::vector<Edge<TEdgeWeight>> neighbors;
+	Vertex() : value(TVertexValue()) { }
 };
 
 // √раф реализован в виде списка смежности.
-// Ѕольшинство методов возращают булево значение - статус выполнени€ метода: успешно/неуспешно.
-// ¬ыходные данные (если таковые в методе имеютс€) в этом случае возвращаютс€ через параметры метода.
+// Ѕольшинство методов возращают булево значение - статус выполнени€ метода: успешно/неуспешно, а
+// выходные данные (если таковые в методе имеютс€) в этом случае возвращаютс€ через параметры метода.
 template<typename TVertexValue, typename TEdgeWeight>
 class Graph
 {
 	std::vector<Vertex<TVertexValue, TEdgeWeight>> adjacency_list;
 	int num_vertices;
-	Graph();
 	bool is_edge_valid(const int vertex_origin, const int vertex_destination) const;
 
 public:
@@ -47,9 +47,6 @@ public:
 	bool set_vertex_value(const int vertex, const TVertexValue& value);
 	void print(std::ostream& out_stream) const;
 };
-
-template<typename TVertexValue, typename TEdgeWeight>
-Graph<typename TVertexValue, typename TEdgeWeight>::Graph() { }
 
 template<typename TVertexValue, typename TEdgeWeight>
 bool Graph<typename TVertexValue, typename TEdgeWeight>::is_edge_valid(
