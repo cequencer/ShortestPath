@@ -15,11 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="program.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="graph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -36,5 +31,10 @@
   <ItemGroup>
     <None Include="graph.txt" />
     <None Include="graph2.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

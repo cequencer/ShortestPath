@@ -32,10 +32,12 @@ struct AStarSearch<typename TVertexValue, TEdgeWeight>::VertexStatus
 	TEdgeWeight cost_from_start_to_this;
 	TEdgeWeight heuristic_cost_from_this_to_goal;
 	TEdgeWeight heuristic_cost_from_start_to_goal;
+
 	VertexStatus() : vertex(-1), status_code(UNDISCOVERED), parent(-1), cost_from_start_to_this(TEdgeWeight()),
 		heuristic_cost_from_this_to_goal(TEdgeWeight()), heuristic_cost_from_start_to_goal(TEdgeWeight()) {}
-	bool operator<(const VertexStatus& right) const { return heuristic_cost_from_start_to_goal < right.heuristic_cost_from_start_to_goal; }
-	bool operator==(const VertexStatus& right) const { return vertex == right.vertex; }
+
+	bool operator<(const VertexStatus& rhs) const { return heuristic_cost_from_start_to_goal < rhs.heuristic_cost_from_start_to_goal; }
+	bool operator==(const VertexStatus& rhs) const { return vertex == rhs.vertex; }
 };
 
 // Алгоритм A* использует для поиска кратчайшего пути эвристическую оценку расстояния от текущей вершины до целевой. 

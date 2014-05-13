@@ -16,7 +16,6 @@ void example_graph()
 	set<int> goal_group;
 
 	start_group.insert(14);
-	//start_group.insert(0);
 	goal_group.insert(8);
 	goal_group.insert(0);
 
@@ -25,8 +24,8 @@ void example_graph()
 	AStarSearch<int, int>::find_shortest_path(
 		graph, start_group, goal_group, AStarSearch<int,int>::AStarDefaultHeuristic(),
 		shortest_path, shortest_path_cost);
-	cout << shortest_path_cost << endl;
 
+	cout << shortest_path_cost << endl;
 	for(list<int>::const_iterator i=shortest_path.begin(); i != shortest_path.end(); ++i)
 		cout << *i << " ";
 	cout << endl << endl;
@@ -43,17 +42,15 @@ void example_graph2()
 	set<int> start_group;
 	set<int> goal_group;
 
-	//start_group.insert(11);
-	start_group.insert(8);
+	start_group.insert(0);
 	goal_group.insert(4);
-	goal_group.insert(12);
 
 	double shortest_path_cost;
 	list<int> shortest_path;
 	AStarSearch<pair<double,double>, double>::find_shortest_path(
 		graph, start_group, goal_group, AStarEuclidianHeuristic(), shortest_path, shortest_path_cost);
-	cout << shortest_path_cost << endl;
 
+	cout << shortest_path_cost << endl;
 	for(list<int>::const_iterator i=shortest_path.begin(); i != shortest_path.end(); ++i)
 		cout << *i << " ";
 	cout << endl << endl;
