@@ -113,7 +113,7 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::get_neighbors(
 {
 	if(vertex >= num_vertices || vertex < 0)
 		return false;
-	neighbors = adjacency_list[vertex].neighbors;
+	neighbors = std::vector<Edge<TEdgeWeight>>(adjacency_list[vertex].neighbors);
 	return true;
 }
 
