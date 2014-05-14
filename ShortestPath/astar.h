@@ -49,6 +49,7 @@ struct AStarSearch<typename TVertexValue, TEdgeWeight>::VertexStatus
 template<typename TVertexValue, typename TEdgeWeight>
 struct AStarSearch<typename TVertexValue, TEdgeWeight>::AStarDefaultHeuristic
 {
+	virtual ~AStarDefaultHeuristic() { }
 	virtual TEdgeWeight get_cost(const Graph<TVertexValue, TEdgeWeight> graph, int start, int goal) const { return TEdgeWeight(); }
 };
 
