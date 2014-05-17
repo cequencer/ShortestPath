@@ -107,11 +107,11 @@ void PriorityQueue<T>::pop()
 template <typename T>
 void PriorityQueue<T>::remove(const T& value)
 {
-	int value_index = distance(storage.begin(), find(storage.begin(), storage.end(), value));
+	size_t value_index = distance(storage.begin(), find(storage.begin(), storage.end(), value));
 	if(value_index == storage.size())
 		return;
 
-	int current = value_index;
+	int current = static_cast<int>(value_index);
 	int parent = static_cast<int>(current + 1)/2 - 1;
 	while(current > 0)
 	{
