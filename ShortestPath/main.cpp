@@ -15,9 +15,10 @@ void example_graph()
 	set<int> start_group;
 	set<int> goal_group;
 
+	start_group.insert(5);
 	start_group.insert(14);
 	goal_group.insert(8);
-	goal_group.insert(0);
+	goal_group.insert(16);
 
 	int shortest_path_cost;
 	list<int> shortest_path;

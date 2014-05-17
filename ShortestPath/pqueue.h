@@ -3,6 +3,7 @@
 #define PQUEUE_H
 
 #include <vector>
+#include <algorithm>
 #include <stdexcept>
 
 // Очередь с приоритетом, в которой можно удалять элементы.
@@ -106,14 +107,11 @@ void PriorityQueue<T>::pop()
 template <typename T>
 void PriorityQueue<T>::remove(const T& value)
 {
-	size_t value_index;
-	for(value_index=0; value_index < storage.size(); ++value_index)
-		if(storage[value_index] == value)
-			break;
+	int value_index = distance(storage.begin(), find(storage.begin(), storage.end(), value));
 	if(value_index == storage.size())
 		return;
 
-	int current = static_cast<int>(value_index);
+	int current = value_index;
 	int parent = static_cast<int>(current + 1)/2 - 1;
 	while(current > 0)
 	{
@@ -130,11 +128,7 @@ void PriorityQueue<T>::remove(const T& value)
 template <typename T>
 bool PriorityQueue<T>::contains(const T& value) const
 {
-	size_t value_index;
-	for(value_index=0; value_index < storage.size(); ++value_index)
-		if(storage[value_index] == value)
-			return true;
-	return false;
+	return (storage.end() != find(storage.begin(), storage.end(), value));
 }
 
 template <typename T>
