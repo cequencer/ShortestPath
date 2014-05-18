@@ -7,11 +7,18 @@ using namespace std;
 void example_graph()
 {
 	ifstream file_stream("graph.txt");
+	if(!file_stream.is_open())
+	{
+		cout << "File open failed." << endl << endl;
+		return;
+	}
+
 	Graph<int, int> graph =
 		GraphIO::from_stream_int(file_stream);
+	file_stream.close();
 
 	graph.print(cout);
-	
+
 	set<int> start_group;
 	set<int> goal_group;
 
@@ -35,11 +42,18 @@ void example_graph()
 void example_graph2()
 {
 	ifstream file_stream("graph2.txt");
+	if(!file_stream.is_open())
+	{
+		cout << "File open failed." << endl << endl;
+		return;
+	}
+
 	Graph<pair<double,double>, double> graph =
 		GraphIO::from_stream_double_double(file_stream);
+	file_stream.close();
 
 	graph.print(cout);
-	
+
 	set<int> start_group;
 	set<int> goal_group;
 
@@ -62,5 +76,6 @@ int main()
 	example_graph();
 	example_graph2();
 
-	return 0;	
+	cin.get();
+	return 0;
 }
