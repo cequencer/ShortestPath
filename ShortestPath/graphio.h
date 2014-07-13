@@ -24,7 +24,7 @@ public:
 class AStarEuclidianHeuristic : public AStarSearch<point, double>::AStarDefaultHeuristic
 {
 public:
-	virtual double get_cost(const Graph<point, double> graph, int start, int goal) const;
+	virtual double get_cost(const Graph<point, double> graph, int start, int goal) const override;
 };
 
 // Правильный формат данных: число вершин, список ребер.

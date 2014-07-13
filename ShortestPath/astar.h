@@ -24,7 +24,7 @@ private :
 };
 
 template<typename TVertexValue, typename TEdgeWeight>
-struct AStarSearch<typename TVertexValue, TEdgeWeight>::VertexStatus
+struct AStarSearch<TVertexValue, TEdgeWeight>::VertexStatus
 {	
 	int vertex;
 	int parent;	
@@ -47,7 +47,7 @@ struct AStarSearch<typename TVertexValue, TEdgeWeight>::VertexStatus
 // Трудоемкость алгоритма A* существенно зависит от используемой эвристичекой оценки.
 // Если использовать нулевую оценку по умолчанию, то получим в сущности алгоритм Дейкстры (останавливающийся при достижении целевой вершины).
 template<typename TVertexValue, typename TEdgeWeight>
-struct AStarSearch<typename TVertexValue, TEdgeWeight>::AStarDefaultHeuristic
+struct AStarSearch<TVertexValue, TEdgeWeight>::AStarDefaultHeuristic
 {
 	virtual ~AStarDefaultHeuristic() { }
 	virtual TEdgeWeight get_cost(const Graph<TVertexValue, TEdgeWeight> graph, int start, int goal) const { return TEdgeWeight(); }
@@ -59,7 +59,7 @@ struct AStarSearch<typename TVertexValue, TEdgeWeight>::AStarDefaultHeuristic
 // которая соединена ребрами со всеми вершинами из группы стартовых вершин.
 // Далее осуществляется поиск кратчайшего пути с помощью A* от добавленной до ближайшей целевой вершины.
 template<typename TVertexValue, typename TEdgeWeight>
-bool AStarSearch<typename TVertexValue,TEdgeWeight>::find_shortest_path(
+bool AStarSearch<TVertexValue,TEdgeWeight>::find_shortest_path(
 	const Graph<TVertexValue, TEdgeWeight>& graph, const std::set<int> start_group, const std::set<int> goal_group,
 	const AStarDefaultHeuristic& heuristic,	std::list<int>& shortest_path, TEdgeWeight& shortest_path_cost)
 {
@@ -161,7 +161,7 @@ bool AStarSearch<typename TVertexValue,TEdgeWeight>::find_shortest_path(
 // Получает оценки расстояний от выбранной вершины до всех конечных вершин, возвращает минимальную оценку.
 // Предполагается, что goal_group не пуст.
 template<typename TVertexValue, typename TEdgeWeight>
-TEdgeWeight AStarSearch<typename TVertexValue,TEdgeWeight>::min_heuristic_cost(const Graph<TVertexValue, TEdgeWeight>& graph, const int start,
+TEdgeWeight AStarSearch<TVertexValue,TEdgeWeight>::min_heuristic_cost(const Graph<TVertexValue, TEdgeWeight>& graph, const int start,
 	const std::set<int> goal_group,	const AStarDefaultHeuristic& heuristic)
 {	
 	TEdgeWeight current_weight;

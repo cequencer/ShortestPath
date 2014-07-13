@@ -49,7 +49,7 @@ public:
 };
 
 template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<typename TVertexValue, typename TEdgeWeight>::is_edge_valid(
+bool Graph<TVertexValue, TEdgeWeight>::is_edge_valid(
 	const int vertex_origin, const int vertex_destination) const
 {
 	if(vertex_origin >= num_vertices || vertex_destination >= num_vertices
@@ -59,7 +59,7 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::is_edge_valid(
 }
 
 template<typename TVertexValue, typename TEdgeWeight>
-Graph<typename TVertexValue, typename TEdgeWeight>::Graph(int num_vertices) : num_vertices(num_vertices)
+Graph<TVertexValue, TEdgeWeight>::Graph(int num_vertices) : num_vertices(num_vertices)
 {
 	adjacency_list.resize(num_vertices);
 }
@@ -67,7 +67,7 @@ Graph<typename TVertexValue, typename TEdgeWeight>::Graph(int num_vertices) : nu
 // Граф неориентированный, поэтому метод добавляет сразу две записи
 // в список смежности: ВЕРШИНА1 ВЕРШИНА2 ВЕС и ВЕРШИНА2 ВЕРШИНА1 ВЕС.
 template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<typename TVertexValue, typename TEdgeWeight>::add_edge(
+bool Graph<TVertexValue, TEdgeWeight>::add_edge(
 	const int vertex_origin, const int vertex_destination, const TEdgeWeight& weight)
 {
 	if(!is_edge_valid(vertex_origin, vertex_destination))
@@ -83,7 +83,7 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::add_edge(
 }
 
 template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<typename TVertexValue, typename TEdgeWeight>::remove_edge(
+bool Graph<TVertexValue, TEdgeWeight>::remove_edge(
 	const int vertex_origin, const int vertex_destination)
 {
 	if(!is_edge_valid(vertex_origin, vertex_destination))
@@ -108,7 +108,7 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::remove_edge(
 }
 
 template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<typename TVertexValue, typename TEdgeWeight>::get_neighbors(
+bool Graph<TVertexValue, TEdgeWeight>::get_neighbors(
 	const int vertex, std::vector<Edge<TEdgeWeight>>& neighbors) const
 {
 	if(vertex >= num_vertices || vertex < 0)
@@ -118,13 +118,13 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::get_neighbors(
 }
 
 template<typename TVertexValue, typename TEdgeWeight>
-int Graph<typename TVertexValue, typename TEdgeWeight>::get_num_vertices() const
+int Graph<TVertexValue, TEdgeWeight>::get_num_vertices() const
 {
 	return num_vertices;
 }
 
 template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<typename TVertexValue, typename TEdgeWeight>::contains_edge(
+bool Graph<TVertexValue, TEdgeWeight>::contains_edge(
 	const int vertex_origin, const int vertex_destination) const
 {
 	TEdgeWeight weight;
@@ -132,7 +132,7 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::contains_edge(
 }
 
 template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<typename TVertexValue, typename TEdgeWeight>::get_edge_weight(
+bool Graph<TVertexValue, TEdgeWeight>::get_edge_weight(
 	const int vertex_origin, const int vertex_destination, TEdgeWeight& weight) const
 {
 	if(!is_edge_valid(vertex_origin, vertex_destination))
@@ -149,7 +149,7 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::get_edge_weight(
 }
 
 template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<typename TVertexValue, typename TEdgeWeight>::set_edge_weight(
+bool Graph<TVertexValue, TEdgeWeight>::set_edge_weight(
 	const int vertex_origin, const int vertex_destination, const TEdgeWeight& weight)
 {
 	if(!is_edge_valid(vertex_origin, vertex_destination))
@@ -166,7 +166,7 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::set_edge_weight(
 }
 
 template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<typename TVertexValue, typename TEdgeWeight>::get_vertex_value(
+bool Graph<TVertexValue, TEdgeWeight>::get_vertex_value(
 	const int vertex, TVertexValue& value) const
 {
 	if(vertex >= num_vertices || vertex < 0)
@@ -176,7 +176,7 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::get_vertex_value(
 }
 
 template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<typename TVertexValue, typename TEdgeWeight>::set_vertex_value(
+bool Graph<TVertexValue, TEdgeWeight>::set_vertex_value(
 	const int vertex, const TVertexValue& value)
 {
 	if(vertex >= num_vertices || vertex < 0)
@@ -186,7 +186,7 @@ bool Graph<typename TVertexValue, typename TEdgeWeight>::set_vertex_value(
 }
 
 template<typename TVertexValue, typename TEdgeWeight>
-inline void Graph<typename TVertexValue, typename TEdgeWeight>::print(std::ostream& out_stream) const
+inline void Graph<TVertexValue, TEdgeWeight>::print(std::ostream& out_stream) const
 {
 	for(size_t i=0; i < adjacency_list.size(); ++i)
 	{
