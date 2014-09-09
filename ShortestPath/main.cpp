@@ -3,6 +3,20 @@
 #include "graphio.h"
 
 using namespace std;
+using namespace graph;
+using namespace graphio;
+
+void example_graph();
+void example_graph2();
+
+int main()
+{
+	example_graph();
+	example_graph2();
+	
+	cin.get();
+	return 0;
+}
 
 void example_graph()
 {
@@ -13,14 +27,13 @@ void example_graph()
 		return;
 	}
 
-	Graph<int, int> graph =
-		GraphIO::from_stream_int(file_stream);
+	Graph<int, int> graph =	GraphIO::from_stream_int(file_stream);
 	file_stream.close();
 
 	graph.print(cout);
 
-	set<int> start_group;
-	set<int> goal_group;
+	set<size_t> start_group;
+	set<size_t> goal_group;
 
 	start_group.insert(5);
 	start_group.insert(14);
@@ -28,13 +41,13 @@ void example_graph()
 	goal_group.insert(16);
 
 	int shortest_path_cost;
-	list<int> shortest_path;
+	list<size_t> shortest_path;
 	AStarSearch<int, int>::find_shortest_path(
-		graph, start_group, goal_group, AStarSearch<int,int>::AStarDefaultHeuristic(),
+		graph, start_group, goal_group, astar_heuristic<int, int>,
 		shortest_path, shortest_path_cost);
 
 	cout << shortest_path_cost << endl;
-	for(list<int>::const_iterator i=shortest_path.begin(); i != shortest_path.end(); ++i)
+	for(auto i=shortest_path.begin(); i != shortest_path.end(); ++i)
 		cout << *i << " ";
 	cout << endl << endl;
 }
@@ -54,28 +67,19 @@ void example_graph2()
 
 	graph.print(cout);
 
-	set<int> start_group;
-	set<int> goal_group;
+	set<size_t> start_group;
+	set<size_t> goal_group;
 
 	start_group.insert(0);
 	goal_group.insert(4);
 
 	double shortest_path_cost;
-	list<int> shortest_path;
+	list<size_t> shortest_path;
 	AStarSearch<pair<double,double>, double>::find_shortest_path(
-		graph, start_group, goal_group, AStarEuclidianHeuristic(), shortest_path, shortest_path_cost);
+		graph, start_group, goal_group, astar_heuristic<point, double>, shortest_path, shortest_path_cost);
 
 	cout << shortest_path_cost << endl;
-	for(list<int>::const_iterator i=shortest_path.begin(); i != shortest_path.end(); ++i)
+	for(auto i=shortest_path.begin(); i != shortest_path.end(); ++i)
 		cout << *i << " ";
 	cout << endl << endl;
-}
-
-int main()
-{
-	example_graph();
-	example_graph2();
-
-	cin.get();
-	return 0;
 }

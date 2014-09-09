@@ -158,6 +158,7 @@ copy $(ProjectDir)\graph2.txt $(OutDir)\graph2.txt /v /y;</Command>
     <ClInclude Include="graph.h" />
     <ClInclude Include="astar.h" />
     <ClInclude Include="graphio.h" />
+    <ClInclude Include="heuristic.h" />
     <ClInclude Include="pqueue.h" />
   </ItemGroup>
   <ItemGroup>

@@ -24,6 +24,9 @@
     <ClInclude Include="astar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="heuristic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="graphio.h">
       <Filter>Header Files</Filter>
     </ClInclude>

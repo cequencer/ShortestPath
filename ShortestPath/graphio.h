@@ -2,97 +2,94 @@
 #ifndef GRAPHIO_H
 #define GRAPHIO_H
 
-#define IOEXCEPTION "Incorrect data structure in istream."
-
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include "astar.h"
+#include "heuristic.h"
 
-class GraphIO;
-class AStarEuclidianHeuristic;
-
-typedef std::pair<double, double> point;
-
-class GraphIO
+namespace graphio
 {
-public:
-	static Graph<int,int> from_stream_int(std::istream& in_stream);
-	static Graph<point,double> from_stream_double_double(std::istream& in_stream);
-};
+	using graph::Graph;
+	using graph::astar_heuristic;
 
-// Эвристическая оценка для алгоритма A* на основе евклидова расстояния между точками плоскости.
-class AStarEuclidianHeuristic : public AStarSearch<point, double>::AStarDefaultHeuristic
-{
-public:
-	virtual double get_cost(const Graph<point, double> graph, int start, int goal) const override;
-};
+	typedef std::pair<double, double> point;
 
-// Правильный формат данных: число вершин, список ребер.
-//
-// ЧИСЛО_ВЕРШИН
-// НАЧАЛЬНАЯ_ВЕРШИНА_РЕБРА	КОНЕЧНАЯ_ВЕРШИНА_РЕБРА	ВЕС_РЕБРА
-//			...						...					...
-// НАЧАЛЬНАЯ_ВЕРШИНА_РЕБРА	КОНЕЧНАЯ_ВЕРШИНА_РЕБРА	ВЕС_РЕБРА
-//
-// Граф неориентированный; не нужно дублировать ребро в списке, меняя местами начальную и конечную вершины.
-inline Graph<int,int> GraphIO::from_stream_int(std::istream& in_stream)
-{
-	int num_vertices;
-	if(!(in_stream >> num_vertices))
-		throw std::ios_base::failure(IOEXCEPTION);
-	Graph<int,int> graph = Graph<int,int>(num_vertices);
-
-	int vertex_origin, vertex_destination, weight;
-	while(in_stream >> vertex_origin && in_stream >> vertex_destination && in_stream >> weight)
-		graph.add_edge(vertex_origin, vertex_destination, weight);
-
-	return graph;
-}
-
-// Правильный формат данных: число вершин, веса вершин, список ребер.
-//
-// ЧИСЛО_ВЕРШИН
-// НОМЕР_ВЕРШИНЫ	КООРДИНАТА_X	КООРДИНАТА_Y
-//		...				...				...
-// НОМЕР_ВЕРШИНЫ	КООРДИНАТА_X	КООРДИНАТА_Y
-// НАЧАЛЬНАЯ_ВЕРШИНА_РЕБРА	КОНЕЧНАЯ_ВЕРШИНА_РЕБРА
-//			...						...
-// НАЧАЛЬНАЯ_ВЕРШИНА_РЕБРА	КОНЕЧНАЯ_ВЕРШИНА_РЕБРА
-//
-// Граф неориентированный; не нужно дублировать ребро в списке, меняя местами начальную и конечную вершины.
-inline Graph<point,double> GraphIO::from_stream_double_double(std::istream& in_stream)
-{
-	int num_vertices;
-	if(!(in_stream >> num_vertices))
-		throw std::ios_base::failure(IOEXCEPTION);
-	Graph<point,double> graph = Graph<point,double>(num_vertices);
-
-	int vertex; 
-	double x, y;
-	for(int i=1; i <= num_vertices; ++i)
+	class GraphIO
 	{
-		if(in_stream >> vertex && in_stream >> x && in_stream >> y)
-			graph.set_vertex_value(vertex, point(x,y));
-		else 
-			throw std::ios_base::failure(IOEXCEPTION);
-	}	
+		static const std::string DataStructureErrorText;
+	public:
+		static Graph<int,int> from_stream_int(std::istream& in_stream);
+		static Graph<point,double> from_stream_double_double(std::istream& in_stream);
+	};
 
-	AStarEuclidianHeuristic heuristic;
-	int vertex_origin, vertex_destination;
-	while(in_stream >> vertex_origin && in_stream >> vertex_destination)
-		graph.add_edge(vertex_origin, vertex_destination, heuristic.get_cost(graph, vertex_origin, vertex_destination));
+	const std::string GraphIO::DataStructureErrorText = "Incorrect data structure in istream.";
 
-	return graph;
-}
+	/**
+	@brief РЎС‡РёС‚С‹РІР°РЅРёРµ РіСЂР°С„Р° Graph<int,int> РёР· РІС…РѕРґРЅРѕРіРѕ РїРѕС‚РѕРєР°.
+	@details РџСЂР°РІРёР»СЊРЅС‹Р№ С„РѕСЂРјР°С‚ РґР°РЅРЅС‹С…: С‡РёСЃР»Рѕ РІРµСЂС€РёРЅ, СЃРїРёСЃРѕРє СЂРµР±РµСЂ.
+	<br/><br/>
+	Р§РРЎР›Рћ_Р’Р•Р РЁРРќ<br/>
+	РќРђР§РђР›Р¬РќРђРЇ_Р’Р•Р РЁРРќРђ_Р Р•Р‘Р Рђ	РљРћРќР•Р§РќРђРЇ_Р’Р•Р РЁРРќРђ_Р Р•Р‘Р Рђ	Р’Р•РЎ_Р Р•Р‘Р Рђ<br/>
+	...	... ... ... ...<br/>
+	РќРђР§РђР›Р¬РќРђРЇ_Р’Р•Р РЁРРќРђ_Р Р•Р‘Р Рђ	РљРћРќР•Р§РќРђРЇ_Р’Р•Р РЁРРќРђ_Р Р•Р‘Р Рђ	Р’Р•РЎ_Р Р•Р‘Р Рђ
+	<br/><br/>
+	Р“СЂР°С„ РЅРµРѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Р№; РЅРµ РЅСѓР¶РЅРѕ РґСѓР±Р»РёСЂРѕРІР°С‚СЊ СЂРµР±СЂРѕ РІ СЃРїРёСЃРєРµ, РјРµРЅСЏСЏ РјРµСЃС‚Р°РјРё РЅР°С‡Р°Р»СЊРЅСѓСЋ Рё РєРѕРЅРµС‡РЅСѓСЋ РІРµСЂС€РёРЅС‹.
+	@param in_stream РІС…РѕРґРЅРѕР№ РїРѕС‚РѕРє
+	@return РіСЂР°С„
+	*/
+	inline Graph<int,int> GraphIO::from_stream_int(std::istream& in_stream)
+	{
+		size_t num_vertices;
+		if(!(in_stream >> num_vertices))
+			throw std::ios_base::failure(DataStructureErrorText);
+		Graph<int,int> graph = Graph<int,int>(num_vertices);
 
-inline double AStarEuclidianHeuristic::get_cost(const Graph<point, double> graph, int start, int goal) const
-{
-	point start_point, goal_point;
-	graph.get_vertex_value(start, start_point);
-	graph.get_vertex_value(goal, goal_point);
+		size_t vertex_origin, vertex_destination;
+		int weight;
+		while(in_stream >> vertex_origin && in_stream >> vertex_destination && in_stream >> weight)
+			graph.add_edge(vertex_origin, vertex_destination, weight);
 
-	double x = start_point.first - goal_point.first;
-	double y = start_point.second - goal_point.second;
-	return sqrt(x*x + y*y);
+		return graph;
+	}
+
+	/**
+	@brief РЎС‡РёС‚С‹РІР°РЅРёРµ РіСЂР°С„Р° Graph<pair<double,double>,double> РёР· РІС…РѕРґРЅРѕРіРѕ РїРѕС‚РѕРєР°.
+	@details РџСЂР°РІРёР»СЊРЅС‹Р№ С„РѕСЂРјР°С‚ РґР°РЅРЅС‹С…: С‡РёСЃР»Рѕ РІРµСЂС€РёРЅ, РІРµСЃР° РІРµСЂС€РёРЅ, СЃРїРёСЃРѕРє СЂРµР±РµСЂ.
+	<br/><br/>
+	Р§РРЎР›Рћ_Р’Р•Р РЁРРќ<br/>
+	РќРћРњР•Р _Р’Р•Р РЁРРќР«	РљРћРћР Р”РРќРђРўРђ_X	РљРћРћР Р”РРќРђРўРђ_Y<br/>
+	...	... ... ... ...<br/>
+	РќРћРњР•Р _Р’Р•Р РЁРРќР«	РљРћРћР Р”РРќРђРўРђ_X	РљРћРћР Р”РРќРђРўРђ_Y<br/>
+	РќРђР§РђР›Р¬РќРђРЇ_Р’Р•Р РЁРРќРђ_Р Р•Р‘Р Рђ	РљРћРќР•Р§РќРђРЇ_Р’Р•Р РЁРРќРђ_Р Р•Р‘Р Рђ<br/>
+	...	... ... ... ...<br/>
+	РќРђР§РђР›Р¬РќРђРЇ_Р’Р•Р РЁРРќРђ_Р Р•Р‘Р Рђ	РљРћРќР•Р§РќРђРЇ_Р’Р•Р РЁРРќРђ_Р Р•Р‘Р Рђ
+	<br/><br/>
+	Р“СЂР°С„ РЅРµРѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Р№; РЅРµ РЅСѓР¶РЅРѕ РґСѓР±Р»РёСЂРѕРІР°С‚СЊ СЂРµР±СЂРѕ РІ СЃРїРёСЃРєРµ, РјРµРЅСЏСЏ РјРµСЃС‚Р°РјРё РЅР°С‡Р°Р»СЊРЅСѓСЋ Рё РєРѕРЅРµС‡РЅСѓСЋ РІРµСЂС€РёРЅС‹.
+	@param in_stream РІС…РѕРґРЅРѕР№ РїРѕС‚РѕРє
+	@return РіСЂР°С„
+	*/
+	inline Graph<point,double> GraphIO::from_stream_double_double(std::istream& in_stream)
+	{
+		size_t num_vertices;
+		if(!(in_stream >> num_vertices))
+			throw std::ios_base::failure(DataStructureErrorText);
+		Graph<point,double> graph = Graph<point,double>(num_vertices);
+
+		size_t vertex; 
+		double x, y;
+		for(size_t i=1; i <= num_vertices; ++i)
+		{
+			if(in_stream >> vertex && in_stream >> x && in_stream >> y)
+				graph.set_vertex_value(vertex, point(x,y));
+			else 
+				throw std::ios_base::failure(DataStructureErrorText);
+		}	
+
+		size_t vertex_origin, vertex_destination;
+		while(in_stream >> vertex_origin && in_stream >> vertex_destination)
+			graph.add_edge(vertex_origin, vertex_destination, astar_heuristic(graph, vertex_origin, vertex_destination));
+
+		return graph;
+	}
 }
 #endif

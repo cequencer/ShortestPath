@@ -6,134 +6,155 @@
 #include <algorithm>
 #include <stdexcept>
 
-// Очередь с приоритетом, в которой можно удалять элементы.
-// Реализована на основе двоичной кучи.
-template<typename T>
-class PriorityQueue
+namespace graph
 {
-	std::vector<T> storage;
-public:
-	PriorityQueue();
-	explicit PriorityQueue(size_t capacity);
-	bool empty() const;
-	T top() const;
-	void push(const T& value);
-	void pop();
-	void remove(const T& value);
-	bool contains(const T& value) const;
-	size_t size() const;
-};
-
-template <typename T>
-PriorityQueue<T>::PriorityQueue() { }
-
-template <typename T>
-PriorityQueue<T>::PriorityQueue(size_t capacity)
-{
-	storage.reserve(capacity);
-}
-
-template <typename T>
-bool PriorityQueue<T>::empty() const
-{
-	return storage.empty();
-}
-template <typename T>
-T PriorityQueue<T>::top() const
-{
-	if(storage.empty())
-		throw std::out_of_range("Queue is empty.");
-	return storage.front();
-}
-
-// Добавляет элемент в конец вектора и <<поднимает>> его до правильной позиции.
-template <typename T>
-void PriorityQueue<T>::push(const T& value)
-{
-	storage.push_back(value);
-
-	if(storage.size() == storage.capacity())
-		storage.reserve(2*storage.size());
-
-	int current = static_cast<int>(storage.size())-1;
-	int parent = static_cast<int>(storage.size())/2-1;
-	while(current > 0 && storage[current] < storage[parent])
+	class empty_queue_error : public std::logic_error
 	{
-		T temp = storage[current];
-		storage[current] = storage[parent];
-		storage[parent] = temp;
-		current = parent;
-		parent = (current + 1)/2 - 1;
+	public:
+		explicit empty_queue_error (const std::string& what_arg) : logic_error(what_arg) {}
+		explicit empty_queue_error (const char* what_arg) : logic_error(what_arg) {}
+	};
+
+	/**
+	@brief РћС‡РµСЂРµРґСЊ СЃ РїСЂРёРѕСЂРёС‚РµС‚РѕРј, РІ РєРѕС‚РѕСЂРѕР№ РјРѕР¶РЅРѕ СѓРґР°Р»СЏС‚СЊ СЌР»РµРјРµРЅС‚С‹.
+	@details Р РµР°Р»РёР·РѕРІР°РЅР° РЅР° РѕСЃРЅРѕРІРµ РґРІРѕРёС‡РЅРѕР№ РєСѓС‡Рё.
+	*/
+	template<typename T>
+	class PriorityQueue
+	{
+		std::vector<T> storage;
+		static const std::string EmptyQueueErrorText;
+	public:
+		PriorityQueue();
+		explicit PriorityQueue(size_t capacity);
+		bool empty() const;
+		const T& top() const;
+		void push(const T& value);
+		void pop();
+		void remove(const T& value);
+		bool contains(const T& value) const;
+		size_t size() const;
+	};
+
+	template <typename T>
+	const std::string PriorityQueue<T>::EmptyQueueErrorText = "Priority queue is empty.";
+
+	template <typename T>
+	PriorityQueue<T>::PriorityQueue() { }
+
+	template <typename T>
+	PriorityQueue<T>::PriorityQueue(size_t capacity)
+	{
+		storage.reserve(capacity);
 	}
-}
 
-// Удаляет корень, на его место записывает последний элемент в векторе
-// и <<опускает>> этот элемент до правильной позиции.
-template <typename T>
-void PriorityQueue<T>::pop()
-{
-	if(storage.empty())
-		throw std::out_of_range("Queue is empty.");
-
-	T last = storage.back();
-	storage.pop_back();
-	if(storage.empty())
-		return;
-
-	size_t current = 0;
-	storage[current] = last;
-	while (current+1 <= storage.size()/2)
+	template <typename T>
+	bool PriorityQueue<T>::empty() const
 	{
-		size_t left_child = 2*(current + 1) - 1;
-		size_t right_child = left_child+1;
-		size_t swap_child;
-		if(left_child+1 < storage.size() && storage[right_child] < storage[left_child])
-			swap_child = right_child;
-		else
-			swap_child = left_child;
-		if(storage[swap_child] < storage[current])
+		return storage.empty();
+	}
+
+	template <typename T>
+	const T& PriorityQueue<T>::top() const
+	{
+		if(storage.empty())
+			throw empty_queue_error(EmptyQueueErrorText);
+		return storage.front();
+	}
+
+	/**
+	@brief Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ СЌР»РµРјРµРЅС‚Р° РІ РѕС‡РµСЂРµРґСЊ.
+	@details Р”РѕР±Р°РІР»СЏРµС‚ СЌР»РµРјРµРЅС‚ РІ РєРѕРЅРµС† РІРµРєС‚РѕСЂР° Рё "РїРѕРґРЅРёРјР°РµС‚" РµРіРѕ РґРѕ РїСЂР°РІРёР»СЊРЅРѕР№ РїРѕР·РёС†РёРё.
+	@param value РґРѕР±Р°РІР»СЏРµРјС‹Р№ СЌР»РµРјРµРЅС‚
+	*/
+	template <typename T>
+	void PriorityQueue<T>::push(const T& value)
+	{
+		storage.push_back(value);
+		size_t current = storage.size()-1;
+		size_t parent;
+		while(current > 0)
 		{
+			parent = (current + 1)/2 - 1;
+			if(!(storage[current] < storage[parent]))
+				break;
 			T temp = storage[current];
-			storage[current] = storage[swap_child];
-			storage[swap_child] = temp;
-			current = swap_child;
+			storage[current] = storage[parent];
+			storage[parent] = temp;
+			current = parent;			
 		}
-		else
-			break;
 	}
-}
-
-// Находит нужный элемент, <<поднимает>> его, пока тот не станет корнем, выполняет pop().
-template <typename T>
-void PriorityQueue<T>::remove(const T& value)
-{
-	size_t value_index = distance(storage.begin(), find(storage.begin(), storage.end(), value));
-	if(value_index == storage.size())
-		return;
-
-	int current = static_cast<int>(value_index);
-	int parent = static_cast<int>(current + 1)/2 - 1;
-	while(current > 0)
+	
+	/**
+	@brief РЈРґР°Р»РµРЅРёРµ СЌР»РµРјРµРЅС‚Р° СЃ РЅР°РёРІС‹СЃС€РёРј РїСЂРёРѕСЂРёС‚РµС‚РѕРј
+	@details РЈРґР°Р»СЏРµС‚ РєРѕСЂРµРЅСЊ, РЅР° РµРіРѕ РјРµСЃС‚Рѕ Р·Р°РїРёСЃС‹РІР°РµС‚ РїРѕСЃР»РµРґРЅРёР№ СЌР»РµРјРµРЅС‚ РІ РІРµРєС‚РѕСЂРµ
+	Рё "РѕРїСѓСЃРєР°РµС‚"СЌС‚РѕС‚ СЌР»РµРјРµРЅС‚ РґРѕ РїСЂР°РІРёР»СЊРЅРѕР№ РїРѕР·РёС†РёРё
+	*/
+	template <typename T>
+	void PriorityQueue<T>::pop()
 	{
-		T temp = storage[current];
-		storage[current] = storage[parent];
-		storage[parent] = temp;
-		current = parent;
-		parent = (current + 1)/2 - 1;
+		if(storage.empty())
+			throw empty_queue_error(EmptyQueueErrorText);
+
+		T last = storage.back();
+		storage.pop_back();
+		if(storage.empty())
+			return;
+
+		size_t current = 0;
+		storage[current] = last;
+		while (current+1 <= storage.size()/2)
+		{
+			size_t left_child = 2*(current + 1) - 1;
+			size_t right_child = left_child+1;
+			size_t swap_child;
+			if(left_child+1 < storage.size() && storage[right_child] < storage[left_child])
+				swap_child = right_child;
+			else
+				swap_child = left_child;
+			if(storage[swap_child] < storage[current])
+			{
+				T temp = storage[current];
+				storage[current] = storage[swap_child];
+				storage[swap_child] = temp;
+				current = swap_child;
+			}
+			else
+				break;
+		}
 	}
 
-	pop();
-}
+	template <typename T>
+	void PriorityQueue<T>::remove(const T& value)
+	{
+		auto value_iterator = find(storage.begin(), storage.end(), value);
+		if(value_iterator == storage.end())
+			return;
 
-template <typename T>
-bool PriorityQueue<T>::contains(const T& value) const
-{
-	return (storage.end() != find(storage.begin(), storage.end(), value));
-}
+		size_t current = distance(storage.begin(), value_iterator);
+		size_t parent;
+		while(current > 0)
+		{
+			parent = (current + 1)/2 - 1;
+			T temp = storage[current];
+			storage[current] = storage[parent];
+			storage[parent] = temp;
+			current = parent;			
+		}
 
-template <typename T>
-size_t PriorityQueue<T>::size() const
-{
-	return storage.size();
+		pop();
+	}
+
+	template <typename T>
+	bool PriorityQueue<T>::contains(const T& value) const
+	{
+		return (storage.end() != find(storage.begin(), storage.end(), value));
+	}
+
+	template <typename T>
+	size_t PriorityQueue<T>::size() const
+	{
+		return storage.size();
+	}
 }
 #endif

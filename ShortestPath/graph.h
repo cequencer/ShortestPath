@@ -4,196 +4,252 @@
 
 #include <ostream>
 #include <vector>
+#include <stdexcept>
+#include <algorithm>
 
-// Класс, представляющий ребро графа.
-// Экземпляр класса хранит только вес и конечную вершину.
-template<typename TEdgeWeight>
-struct Edge
+namespace graph
 {
-	int destination;
-	TEdgeWeight weight;
-	Edge(int destination, TEdgeWeight weight): destination(destination), weight(weight)	{ }
-};
-
-// Класс, позволяющий сохранять дополнительную информацию о вершине (координаты и т.п.).
-template<typename TVertexValue, typename TEdgeWeight>
-struct Vertex
-{
-	TVertexValue value;
-	std::vector<Edge<TEdgeWeight>> neighbors;
-	Vertex() : value(TVertexValue()) { }
-};
-
-// Граф реализован в виде списка смежности.
-// Большинство методов возращают булево значение - статус выполнения метода: успешно/неуспешно, а
-// выходные данные (если таковые в методе имеются) в этом случае возвращаются через параметры метода.
-template<typename TVertexValue, typename TEdgeWeight>
-class Graph
-{
-	std::vector<Vertex<TVertexValue, TEdgeWeight>> adjacency_list;
-	int num_vertices;
-	bool is_edge_valid(const int vertex_origin, const int vertex_destination) const;
-
-public:
-	explicit Graph(int num_vertices);
-	bool add_edge(const int vertex_origin, const int vertex_destination, const TEdgeWeight& weight);
-	bool remove_edge(const int vertex_origin, const int vertex_destination);
-	int get_num_vertices() const;
-	bool get_neighbors(const int vertex, std::vector<Edge<TEdgeWeight>>& neighbors) const;
-	bool contains_edge(const int vertex_origin, const int vertex_destination) const;
-	bool get_edge_weight(const int vertex_origin, const int vertex_destination, TEdgeWeight& weight) const;
-	bool set_edge_weight(const int vertex_origin, const int vertex_destination, const TEdgeWeight& weight);
-	bool get_vertex_value(const int vertex, TVertexValue& value) const;
-	bool set_vertex_value(const int vertex, const TVertexValue& value);
-	void print(std::ostream& out_stream) const;
-};
-
-template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<TVertexValue, TEdgeWeight>::is_edge_valid(
-	const int vertex_origin, const int vertex_destination) const
-{
-	if(vertex_origin >= num_vertices || vertex_destination >= num_vertices
-		|| vertex_origin < 0 || vertex_destination < 0)
-		return false;
-	return true;
-}
-
-template<typename TVertexValue, typename TEdgeWeight>
-Graph<TVertexValue, TEdgeWeight>::Graph(int num_vertices) : num_vertices(num_vertices)
-{
-	adjacency_list.resize(num_vertices);
-}
-
-// Граф неориентированный, поэтому метод добавляет сразу две записи
-// в список смежности: ВЕРШИНА1 ВЕРШИНА2 ВЕС и ВЕРШИНА2 ВЕРШИНА1 ВЕС.
-template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<TVertexValue, TEdgeWeight>::add_edge(
-	const int vertex_origin, const int vertex_destination, const TEdgeWeight& weight)
-{
-	if(!is_edge_valid(vertex_origin, vertex_destination))
-		return false;
-
-	for(size_t i=0; i < adjacency_list[vertex_origin].neighbors.size(); ++i)
-		if(adjacency_list[vertex_origin].neighbors[i].destination == vertex_destination)
-			return false;
-
-	adjacency_list[vertex_origin].neighbors.push_back(Edge<TEdgeWeight>(vertex_destination, weight));
-	adjacency_list[vertex_destination].neighbors.push_back(Edge<TEdgeWeight>(vertex_origin, weight));
-	return true;
-}
-
-template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<TVertexValue, TEdgeWeight>::remove_edge(
-	const int vertex_origin, const int vertex_destination)
-{
-	if(!is_edge_valid(vertex_origin, vertex_destination))
-		return false;
-
-	for(size_t i=0; i < adjacency_list[vertex_origin].neighbors.size(); ++i)
-		if(adjacency_list[vertex_origin].neighbors[i].destination == vertex_destination)
-		{
-			adjacency_list[vertex_origin].neighbors.erase(
-				                             adjacency_list[vertex_origin].neighbors.begin()+i);
-			for(size_t j=0; j < adjacency_list[vertex_destination].neighbors.size(); ++j)
-				if(adjacency_list[vertex_destination].neighbors[j].destination == vertex_origin)
-				{
-					adjacency_list[vertex_destination].neighbors.erase(
-						                                  adjacency_list[vertex_destination].neighbors.begin()+j);
-					break;
-				}
-			return true;
-		}
-
-	return false;
-}
-
-template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<TVertexValue, TEdgeWeight>::get_neighbors(
-	const int vertex, std::vector<Edge<TEdgeWeight>>& neighbors) const
-{
-	if(vertex >= num_vertices || vertex < 0)
-		return false;
-	neighbors = std::vector<Edge<TEdgeWeight>>(adjacency_list[vertex].neighbors);
-	return true;
-}
-
-template<typename TVertexValue, typename TEdgeWeight>
-int Graph<TVertexValue, TEdgeWeight>::get_num_vertices() const
-{
-	return num_vertices;
-}
-
-template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<TVertexValue, TEdgeWeight>::contains_edge(
-	const int vertex_origin, const int vertex_destination) const
-{
-	TEdgeWeight weight;
-	return get_edge_weight(vertex_origin, vertex_destination, weight);
-}
-
-template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<TVertexValue, TEdgeWeight>::get_edge_weight(
-	const int vertex_origin, const int vertex_destination, TEdgeWeight& weight) const
-{
-	if(!is_edge_valid(vertex_origin, vertex_destination))
-		return false;
-
-	for(size_t i=0; i < adjacency_list[vertex_origin].neighbors.size(); ++i)
-		if (adjacency_list[vertex_origin].neighbors[i].destination == vertex_destination)
-		{
-			weight = adjacency_list[vertex_origin].neighbors[i].weight;
-			return true;
-		}
-
-	return false;
-}
-
-template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<TVertexValue, TEdgeWeight>::set_edge_weight(
-	const int vertex_origin, const int vertex_destination, const TEdgeWeight& weight)
-{
-	if(!is_edge_valid(vertex_origin, vertex_destination))
-		return false;
-
-	for(size_t i=0; i < adjacency_list[vertex_origin].neighbors.size(); ++i)
-		if (adjacency_list[vertex_origin].neighbors[i].destination == vertex_destination)
-		{
-			adjacency_list[vertex_origin].neighbors[i].weight = weight;
-			return true;
-		}
-
-	return false;
-}
-
-template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<TVertexValue, TEdgeWeight>::get_vertex_value(
-	const int vertex, TVertexValue& value) const
-{
-	if(vertex >= num_vertices || vertex < 0)
-		return false;
-	value = adjacency_list[vertex].value;
-	return true;
-}
-
-template<typename TVertexValue, typename TEdgeWeight>
-bool Graph<TVertexValue, TEdgeWeight>::set_vertex_value(
-	const int vertex, const TVertexValue& value)
-{
-	if(vertex >= num_vertices || vertex < 0)
-		return false;
-	adjacency_list[vertex].value = value;
-	return true;
-}
-
-template<typename TVertexValue, typename TEdgeWeight>
-inline void Graph<TVertexValue, TEdgeWeight>::print(std::ostream& out_stream) const
-{
-	for(size_t i=0; i < adjacency_list.size(); ++i)
+	class vertex_out_of_range : public std::logic_error
 	{
-		out_stream << i << " <--> ";
-		for(size_t j=0; j < adjacency_list[i].neighbors.size(); ++j)
-			out_stream << adjacency_list[i].neighbors[j].destination << " ";
-		out_stream << std::endl;
+	public:
+		explicit vertex_out_of_range (const std::string& what_arg) : logic_error(what_arg) {}
+		explicit vertex_out_of_range (const char* what_arg) : logic_error(what_arg) {}
+	};
+
+	class nonexistent_edge_error : public std::logic_error
+	{
+	public:
+		explicit nonexistent_edge_error (const std::string& what_arg) : logic_error(what_arg) {}
+		explicit nonexistent_edge_error (const char* what_arg) : logic_error(what_arg) {}
+	};
+
+	/**
+	@brief РљР»Р°СЃСЃ, РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰РёР№ СЂРµР±СЂРѕ РіСЂР°С„Р°. Р­РєР·РµРјРїР»СЏСЂ РєР»Р°СЃСЃР° С…СЂР°РЅРёС‚ С‚РѕР»СЊРєРѕ РІРµСЃ Рё РєРѕРЅРµС‡РЅСѓСЋ РІРµСЂС€РёРЅСѓ.
+	*/	
+	template<typename TEdgeWeight>
+	struct Edge
+	{
+		size_t destination;
+		TEdgeWeight weight;
+		explicit Edge(size_t destination = 0, TEdgeWeight weight = TEdgeWeight()) : 
+			destination(destination), weight(weight) { }
+	};
+
+	/**
+	@brief РљР»Р°СЃСЃ, РїРѕР·РІРѕР»СЏСЋС‰РёР№ СЃРѕС…СЂР°РЅСЏС‚СЊ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РІРµСЂС€РёРЅРµ (РєРѕРѕСЂРґРёРЅР°С‚С‹ Рё С‚.Рї.).
+	*/
+	template<typename TVertexValue, typename TEdgeWeight>
+	struct Vertex
+	{
+		TVertexValue value;
+		std::vector<Edge<TEdgeWeight>> neighbors;
+		Vertex() : value(TVertexValue()) { }
+	};
+
+	/**
+	@brief РљР»Р°СЃСЃ, РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰РёР№ РіСЂР°С„. Р“СЂР°С„ СЂРµР°Р»РёР·РѕРІР°РЅ РІ РІРёРґРµ СЃРїРёСЃРєР° СЃРјРµР¶РЅРѕСЃС‚Рё РЅР° РѕСЃРЅРѕРІРµ std::vector
+	*/
+	template<typename TVertexValue, typename TEdgeWeight>
+	class Graph
+	{
+		std::vector<Vertex<TVertexValue, TEdgeWeight>> adjacency_list;
+
+		size_t num_vertices;
+
+		bool is_edge_valid(const size_t vertex_origin, const size_t vertex_destination) const;
+
+		typename std::vector<Edge<TEdgeWeight>>::const_iterator find_edge(typename std::vector<Edge<TEdgeWeight>>::const_iterator begin,
+			typename std::vector<Edge<TEdgeWeight>>::const_iterator end, size_t destination) const;
+
+		typename std::vector<Edge<TEdgeWeight>>::iterator find_edge(typename std::vector<Edge<TEdgeWeight>>::iterator begin,
+			typename std::vector<Edge<TEdgeWeight>>::iterator end, size_t destination);
+
+		static const std::string VertexOutOfRangeText;
+
+		static const std::string NonexistentEdgeErrorText;
+
+	public:
+		typedef typename std::vector<Edge<TEdgeWeight>>::const_iterator neighbor_iterator;
+
+		explicit Graph(size_t num_vertices);
+				
+		void add_edge(const size_t vertex_origin, const size_t vertex_destination, const TEdgeWeight& weight);
+
+		void remove_edge(const size_t vertex_origin, const size_t vertex_destination);	
+
+		std::pair<neighbor_iterator, neighbor_iterator> get_neighbors(const size_t vertex) const;
+
+		size_t get_num_vertices() const;
+
+		bool contains_edge(const size_t vertex_origin, const size_t vertex_destination) const;
+
+		TEdgeWeight get_edge_weight(const size_t vertex_origin, const size_t vertex_destination) const;
+
+		void set_edge_weight(const size_t vertex_origin, const size_t vertex_destination, const TEdgeWeight& weight);
+
+		TVertexValue get_vertex_value(const size_t vertex) const;
+
+		void set_vertex_value(const size_t vertex, const TVertexValue& value);
+
+		void print(std::ostream& out_stream) const;
+	};
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	const std::string Graph<TVertexValue, TEdgeWeight>::VertexOutOfRangeText = "Vertex number is out of range.";
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	const std::string Graph<TVertexValue, TEdgeWeight>::NonexistentEdgeErrorText = "Graph doesn't contain requested edge.";
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	inline bool Graph<TVertexValue, TEdgeWeight>::is_edge_valid(
+		const size_t vertex_origin, const size_t vertex_destination) const
+	{
+		return !(vertex_origin >= num_vertices || vertex_destination >= num_vertices);
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	typename std::vector<Edge<TEdgeWeight>>::const_iterator Graph<TVertexValue, TEdgeWeight>::find_edge(typename std::vector<Edge<TEdgeWeight>>::const_iterator begin,
+			typename std::vector<Edge<TEdgeWeight>>::const_iterator end, size_t destination) const
+	{
+		return std::find_if(begin, end,	[destination](const Edge<TEdgeWeight>& v) { return v.destination == destination; });
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	typename std::vector<Edge<TEdgeWeight>>::iterator Graph<TVertexValue, TEdgeWeight>::find_edge(typename std::vector<Edge<TEdgeWeight>>::iterator begin,
+			typename std::vector<Edge<TEdgeWeight>>::iterator end, size_t destination)
+	{
+		return std::find_if(begin, end,	[destination](const Edge<TEdgeWeight>& v) { return v.destination == destination; });
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	Graph<TVertexValue, TEdgeWeight>::Graph(size_t num_vertices) : 
+		num_vertices(num_vertices), adjacency_list(num_vertices)
+	{
+	}
+
+	/**
+	@brief Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕРіРѕ СЂРµР±СЂР° РІ РіСЂР°С„.
+	@details Р“СЂР°С„ РЅРµРѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Р№, РїРѕСЌС‚РѕРјСѓ РјРµС‚РѕРґ РґРѕР±Р°РІР»СЏРµС‚ СЃСЂР°Р·Сѓ РґРІР° СЂРµР±СЂР°
+	РІ СЃРїРёСЃРѕРє СЃРјРµР¶РЅРѕСЃС‚Рё: РїСЂСЏРјРѕРµ Рё РѕР±СЂР°С‚РЅРѕРµ СЃ С‚РµРј Р¶Рµ РІРµСЃРѕРј.
+	@param vertex_origin РЅР°С‡Р°Р»СЊРЅР°СЏ РІРµСЂС€РёРЅР° СЂРµР±СЂР°
+	@param vertex_destination РєРѕРЅРµС‡РЅР°СЏ РІРµСЂС€РёРЅР° СЂРµР±СЂР°
+	@param weight РІРµСЃ СЂРµР±СЂР°
+	*/
+	template<typename TVertexValue, typename TEdgeWeight>
+	void Graph<TVertexValue, TEdgeWeight>::add_edge(
+		const size_t vertex_origin, const size_t vertex_destination, const TEdgeWeight& weight)
+	{
+		if(!is_edge_valid(vertex_origin, vertex_destination))
+			throw vertex_out_of_range(VertexOutOfRangeText);
+		
+		if(find_edge(adjacency_list[vertex_origin].neighbors.begin(), adjacency_list[vertex_origin].neighbors.end(),
+			vertex_destination)	!= adjacency_list[vertex_origin].neighbors.end())
+			return;
+
+		adjacency_list[vertex_origin].neighbors.push_back(Edge<TEdgeWeight>(vertex_destination, weight));
+		adjacency_list[vertex_destination].neighbors.push_back(Edge<TEdgeWeight>(vertex_origin, weight));
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	void Graph<TVertexValue, TEdgeWeight>::remove_edge(
+		const size_t vertex_origin, const size_t vertex_destination)
+	{
+		if(!is_edge_valid(vertex_origin, vertex_destination))
+			throw vertex_out_of_range(VertexOutOfRangeText);
+
+		std::remove_if(adjacency_list[vertex_origin].neighbors.begin(), adjacency_list[vertex_origin].neighbors.end(),
+			[vertex_destination](const Edge<TEdgeWeight>& v) { return v.destination == vertex_destination; });
+
+		std::remove_if(adjacency_list[vertex_destination].neighbors.begin(), adjacency_list[vertex_destination].neighbors.end(),
+			[vertex_origin](const Edge<TEdgeWeight>& v) { return v.destination == vertex_origin; });
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	inline std::pair<typename Graph<TVertexValue, TEdgeWeight>::neighbor_iterator, typename Graph<TVertexValue, TEdgeWeight>::neighbor_iterator>
+		Graph<TVertexValue, TEdgeWeight>::get_neighbors(const size_t vertex) const
+	{
+		if(vertex >= num_vertices)
+			throw vertex_out_of_range(VertexOutOfRangeText);
+		return std::make_pair(adjacency_list[vertex].neighbors.cbegin(), adjacency_list[vertex].neighbors.cend());
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	inline size_t Graph<TVertexValue, TEdgeWeight>::get_num_vertices() const
+	{
+		return num_vertices;
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	bool Graph<TVertexValue, TEdgeWeight>::contains_edge(
+		const size_t vertex_origin, const size_t vertex_destination) const
+	{
+		if(!is_edge_valid(vertex_origin, vertex_destination))
+			throw vertex_out_of_range(VertexOutOfRangeText);
+
+		return find_edge(adjacency_list[vertex_origin].neighbors.begin(), adjacency_list[vertex_origin].neighbors.end(),
+			vertex_destination)	!= adjacency_list[vertex_origin].neighbors.end();
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	TEdgeWeight Graph<TVertexValue, TEdgeWeight>::get_edge_weight(
+		const size_t vertex_origin, const size_t vertex_destination) const
+	{
+		if(!is_edge_valid(vertex_origin, vertex_destination))
+			throw vertex_out_of_range(VertexOutOfRangeText);
+
+		auto edge_it = find_edge(adjacency_list[vertex_origin].neighbors.begin(), adjacency_list[vertex_origin].neighbors.end(),
+			vertex_destination);
+
+		if(edge_it == adjacency_list[vertex_origin].neighbors.end())
+			throw nonexistent_edge_error(NonexistentEdgeErrorText);
+	
+		return edge_it->weight;
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	void Graph<TVertexValue, TEdgeWeight>::set_edge_weight(
+		const size_t vertex_origin, const size_t vertex_destination, const TEdgeWeight& weight)
+	{
+		if(!is_edge_valid(vertex_origin, vertex_destination))
+			throw vertex_out_of_range(VertexOutOfRangeText);
+
+		auto edge_it = find_edge(adjacency_list[vertex_origin].neighbors.begin(), adjacency_list[vertex_origin].neighbors.end(),
+			vertex_destination);
+
+		if(edge_it == adjacency_list[vertex_origin].neighbors.end())
+			throw nonexistent_edge_error(NonexistentEdgeErrorText);
+
+		edge_it->weight = weight;
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	TVertexValue Graph<TVertexValue, TEdgeWeight>::get_vertex_value(
+		const size_t vertex) const
+	{
+		if(vertex >= num_vertices)
+			throw vertex_out_of_range(VertexOutOfRangeText);
+		return adjacency_list[vertex].value;
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	void Graph<TVertexValue, TEdgeWeight>::set_vertex_value(
+		const size_t vertex, const TVertexValue& value)
+	{
+		if(vertex >= num_vertices)
+			throw vertex_out_of_range(VertexOutOfRangeText);
+		adjacency_list[vertex].value = value;
+	}
+
+	template<typename TVertexValue, typename TEdgeWeight>
+	inline void Graph<TVertexValue, TEdgeWeight>::print(std::ostream& out_stream) const
+	{
+		for(size_t i=0; i < adjacency_list.size(); ++i)
+		{
+			out_stream << i << " <--> ";
+			for(size_t j=0; j < adjacency_list[i].neighbors.size(); ++j)
+				out_stream << adjacency_list[i].neighbors[j].destination << " ";
+			out_stream << std::endl;
+		}
 	}
 }
 #endif
